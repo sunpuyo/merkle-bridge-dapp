@@ -119,6 +119,8 @@
     >Approve</v-btn>&nbsp;
     <v-btn color="primary" :disabled="valid === false" @click="clickSend"> {{this.optype}} </v-btn>
     <v-btn text @click="clickBack">Back</v-btn>
+    <br/>
+   <v-spacer><br/></v-spacer>
 
     <!-- send result dialog -->
     <v-row justify="center">
