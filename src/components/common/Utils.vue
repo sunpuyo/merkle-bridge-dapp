@@ -2,7 +2,12 @@
 import { Address } from "@herajs/client";
 import { web3 } from "./Web3Loader";
 import { utils } from "eth-merkle-bridge-js";
+import { getAnchorState } from "./AergoUtil";
 import { AergoClient, GrpcWebProvider, Amount } from "@herajs/client";
+
+const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
 
 export function validateAddress(netType, address) {
   if (!address) {
@@ -53,24 +58,25 @@ export function sendTxToAergoConnect(endpoint, contractID, builtTx) {
       window.addEventListener(
         "AERGO_SEND_TX_RESULT",
         event => {
-          setTimeout(async () => {
-            try {
-              if (event.detail.error) {
-                reject(event.detail.error);
-              } else {
-                let receipt = await herajs.getTransactionReceipt(
-                  event.detail.hash
-                );
+          if (event.detail.error) {
+            reject(event.detail.error);
+          } else {
+            sleep(5000).then(() => {
+              herajs.getTransactionReceipt(
+                event.detail.hash
+              ).then(receipt => {
                 // set to new key to match with ether
                 receipt.blockNumber = receipt.blockno;
                 receipt.blockHash = receipt.blockhash;
                 receipt.transactionHash = event.detail.hash;
                 resolve(receipt);
-              }
-            } catch (err) {
-              reject(err);
-            }
-          }, 2000);
+              }).catch((err) => {
+                // eslint-disable-next-line
+                console.log(`fail to get tx (${err}) retry in 10 sec`)
+                resolve({transactionHash:event.detail.hash});
+              });
+            });
+          }
         },
         {
           once: true
@@ -90,27 +96,40 @@ export function sendTxToAergoConnect(endpoint, contractID, builtTx) {
 }
 
 export async function getAergoNextVerifyToReceiver(
-  web3Full,
-  herajs,
+  toWeb3Full,
+  toHerajs,
+  fromHerajs,
   bridgeAergoAddr,
-  bridgeEthAddr,
+  bridgeEthOrAergoAddr,
   eventName,
   receiverAddress
 ) {
-  let anchorStatusQuery = await utils.getAergoAnchorStatus(
-    web3Full,
-    herajs,
-    bridgeEthAddr
-  );
+  let anchorStatusQuery;
+  let args = new Map();
+
+  if(toWeb3Full) {
+    // type of to_network is ethereum
+    anchorStatusQuery = await utils.getAergoAnchorStatus(
+      toWeb3Full,
+      fromHerajs,
+      bridgeEthOrAergoAddr
+    );
+    args.set(1, receiverAddress.slice(2).toLowerCase()); // event filter
+  } else {
+    // type of to_network is aergo
+    anchorStatusQuery = await getAnchorState(
+      toHerajs,
+      fromHerajs,
+      bridgeEthOrAergoAddr
+    );
+    args.set(1, receiverAddress); // event filter
+  }
 
   const fromBlock =
     anchorStatusQuery.bestHeight -
     (anchorStatusQuery.tAnchor + anchorStatusQuery.tFinal);
 
-  let args = new Map();
-  args.set(1, receiverAddress.slice(2).toLowerCase());
-
-  let events = await herajs.getEvents({
+  let events = await fromHerajs.getEvents({
     address: bridgeAergoAddr,
     eventName: eventName,
     blockfrom: fromBlock,

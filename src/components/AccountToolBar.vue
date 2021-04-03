@@ -129,7 +129,7 @@ export default {
     /* eslint-disable */ 
     console.log(web3.currentProvider);
     // set ethereum account change listener
-    web3.currentProvider.connection.publicConfigStore.on("update", account => {
+    web3.currentProvider.connection.on("update", account => {
       this.etheraccount = account;
       updateDefaultAccount(account.selectedAddress);
       this.$emit("login_ethereum", account);

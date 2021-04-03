@@ -208,6 +208,7 @@ import {
   applyDecimals
 } from "./common/Utils";
 import { assetType } from "./common/DefaultBridges";
+import { buildFreezeToAergoTx, buildUnfreezeToAergoTx } from "./common/AergoUtil";
 import { AergoClient, GrpcWebProvider, Amount } from "@herajs/client";
 
 export default {
@@ -491,36 +492,74 @@ export default {
             "Waiting to unlock. Please confirm the TX in your wallet and wait for it to be finalized."
           );
         } else if (this.optype == "unfreeze") {
-          let builtTx = await ethToAergo.buildUnfreezeTx(
-            web3,
-            new AergoClient(
-              {},
-              new GrpcWebProvider({ url: this.toBridge.net.endpoint })
-            ),
-            this.wallet.address,
-            this.fromBridge.contract.id,
-            this.toBridge.contract.id,
-            this.toBridge.contract.abi,
-            this.verifiedReceiver,
-            this.fromBridge.asset.id
-          );
-          await this.handleResult(
-            this.sendDialog,
-            sendTxToAergoConnect(
-              this.toBridge.net.endpoint,
+          if(this.fromBridge.net.type == "ethereum") {
+            let builtTx = await ethToAergo.buildUnfreezeTx(
+              web3,
+              new AergoClient(
+                {},
+                new GrpcWebProvider({ url: this.toBridge.net.endpoint })
+              ),
+              this.wallet.address,
+              this.fromBridge.contract.id,
               this.toBridge.contract.id,
-              builtTx
-            ),
-            "Waiting to unfreeze. Please confirm the TX in your wallet and wait for it to be finalized."
-          );
+              this.toBridge.contract.abi,
+              this.verifiedReceiver,
+              this.fromBridge.asset.id
+            );
+            await this.handleResult(
+              this.sendDialog,
+              sendTxToAergoConnect(
+                this.toBridge.net.endpoint,
+                this.toBridge.contract.id,
+                builtTx
+              ),
+              "Waiting to unfreeze. Please confirm the TX in your wallet and wait for it to be finalized."
+            );
+          } else if(this.fromBridge.net.type == "aergo") {
+            // aergo to aergo bridge
+            let builtTx = await buildUnfreezeToAergoTx(
+              this.wallet.address,
+              new AergoClient({}, new GrpcWebProvider({ url: this.fromBridge.net.endpoint })),
+              new AergoClient({}, new GrpcWebProvider({ url: this.toBridge.net.endpoint })),
+              this.fromBridge.contract.id,
+              this.toBridge.contract.id,
+              this.toBridge.contract.abi,
+              this.verifiedReceiver
+            );
+
+            await this.handleResult(
+              this.sendDialog,
+              sendTxToAergoConnect(
+                this.fromBridge.net.endpoint,
+                this.fromBridge.contract.id,
+                builtTx
+              ),
+              "Waiting to freeze. Please confirm the TX in your wallet and wait for it to be finalized."
+            );
+          }
         } else if (this.optype == "freeze") {
-          let builtTx = await aergoToEth.buildFreezeTx(
-            this.wallet.address,
-            this.amount.formatNumber(),
-            this.fromBridge.contract.id,
-            this.fromBridge.contract.abi,
-            this.receiver
-          );
+          let builtTx;
+          if(this.toBridge.net.type == "ethereum") {
+            // aergo to ether
+            builtTx = await aergoToEth.buildFreezeTx(
+              this.wallet.address,
+              this.amount.formatNumber(),
+              this.fromBridge.contract.id,
+              this.fromBridge.contract.abi,
+              this.receiver
+            );
+            
+          } else if(this.toBridge.net.type == "aergo") {
+            // aergo to aergo bridge
+            builtTx = await buildFreezeToAergoTx(
+              this.wallet.address,
+              this.amount.formatNumber(),
+              this.fromBridge.contract.id,
+              this.fromBridge.contract.abi,
+              this.receiver
+            );
+          }
+
           await this.handleResult(
             this.sendDialog,
             sendTxToAergoConnect(
@@ -635,10 +674,16 @@ export default {
           {},
           new GrpcWebProvider({ url: this.toBridge.net.endpoint })
         );
-        const unfreezeFee = await utils.getAergoUnfreezeFee(
-          herajs,
-          this.toBridge.contract.id
-        );
+        let unfreezeFee;
+        try {
+          unfreezeFee = await utils.getAergoUnfreezeFee(
+            herajs,
+            this.toBridge.contract.id
+          );
+        } catch(Error) {
+          unfreezeFee = 0;
+        }
+
         this.verifiedAmountWithFeeDecimalsStr = applyDecimals(
           new Amount(
             applyDecimals(

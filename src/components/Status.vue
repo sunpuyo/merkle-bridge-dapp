@@ -110,6 +110,7 @@ import {
 import { ethToAergo, aergoToEth } from "eth-merkle-bridge-js";
 import { AergoClient, GrpcWebProvider } from "@herajs/client";
 import Web3 from "web3";
+import { unfreezable } from "./common/AergoUtil";
 
 export default {
   name: "Status",
@@ -207,36 +208,52 @@ export default {
             this.optype,
             this.receiver
           );
-        } else if (
-          this.fromBridge.net.type === "aergo" &&
-          this.toBridge.net.type === "ethereum"
-        ) {
-          let herajs = new AergoClient(
+        } else if (this.fromBridge.net.type === "aergo") {
+
+          let fromHerajs = new AergoClient(
             {},
             new GrpcWebProvider({ url: this.fromBridge.net.endpoint })
           );
+          let web3Full;
+          let toHerajs;
 
-          let web3Full = new Web3(
-            new Web3.providers.HttpProvider(this.toBridge.net.endpoint)
-          );
+          if(this.toBridge.net.type === "ethereum") {
+             // aergo to ether
+            web3Full = new Web3(
+              new Web3.providers.HttpProvider(this.toBridge.net.endpoint)
+            );
 
-          withdrawStatusQuery = aergoToEth.unlockable(
-            web3Full,
-            herajs,
-            this.toBridge.contract.id,
-            this.fromBridge.contract.id,
-            this.receiver,
-            this.toBridge.asset.id
-          );
+            withdrawStatusQuery = aergoToEth.unlockable(
+              web3Full,
+              fromHerajs,
+              this.toBridge.contract.id,
+              this.fromBridge.contract.id,
+              this.receiver,
+              this.toBridge.asset.id
+            );
+          } else {
+            // aergo to aergo
+            toHerajs = new AergoClient(
+              {}, new GrpcWebProvider({ url: this.toBridge.net.endpoint }));
 
-          nextVerifyQuery = getAergoNextVerifyToReceiver(
-            web3Full,
-            herajs,
-            this.fromBridge.contract.id,
-            this.toBridge.contract.id,
-            this.optype,
-            this.receiver
-          );
+            withdrawStatusQuery = unfreezable(
+              fromHerajs,
+              toHerajs,
+              this.fromBridge.contract.id,
+              this.toBridge.contract.id,
+              this.receiver
+            );
+          }
+
+            nextVerifyQuery = getAergoNextVerifyToReceiver(
+              web3Full,
+              toHerajs,
+              fromHerajs,
+              this.fromBridge.contract.id,
+              this.toBridge.contract.id,
+              this.optype,
+              this.receiver
+            );
         }
 
         Promise.all([withdrawStatusQuery, nextVerifyQuery])

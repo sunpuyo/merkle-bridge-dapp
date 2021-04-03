@@ -756,10 +756,10 @@
     hash.js "^1.1.7"
     jsbi "^3.0.0"
 
-"@herajs/client@^0.16.4":
-  version "0.16.4"
-  resolved "https://registry.yarnpkg.com/@herajs/client/-/client-0.16.4.tgz#99a81b3360a7cc6019d67e51e0443a2547c37a40"
-  integrity sha512-7bvdk+7K+G/zB9vRm1S6+fMtdIwoGofoyS4UYTskJqVLGbMWk4NSHg9ojMddDSSMmOIvmgYPXRQbF2ZAxhBmJg==
+"@herajs/client@^0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@herajs/client/-/client-0.17.1.tgz#0e4405cf71316b98b8b3578cb81b9d4b2df17efc"
+  integrity sha512-3wyMwabH0/QcBATQMMqTar/V5vR8AQi97gGpzM2Upz1QhZsvLEoo4LzyO8bfkNo5NvGNyQDICZdV4fbf7AuKbA==
   dependencies:
     "@improbable-eng/grpc-web" "^0.9.1"
     "@types/google-protobuf" "^3.2.7"

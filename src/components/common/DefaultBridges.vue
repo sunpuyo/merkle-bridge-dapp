@@ -64,6 +64,48 @@ export const defaultBridges = [
         scan: "https://testnet.aergoscan.io/go?q="
       },
       contract: {
+        id: "Amgru14RQMrwRM8TnnLrT3aa3TePJr2F4yfbqN81KffkXKXbw4oz", //FIXME
+        abi: aergoBridgeAbi 
+      },
+      asset: {
+        label: "Native Aergo",
+        type: assetType.native,
+        isPegged: false,
+        id: "",
+        decimals: 18
+      }
+    },
+    bridge2: {
+      net: {
+        label: "Aergo Alpha",
+        type: "aergo",
+        chainId: "alpha.aergo.io",
+        endpoint: "https://alpha-api-http.aergo.io", //http://alpha1.aergo.io:7845
+        scan: "https://alpha.aergoscan.io/go?q="
+      },
+      contract: {
+        id: "Amgru14RQMrwRM8TnnLrT3aa3TePJr2F4yfbqN81KffkXKXbw4oz", //FIXME
+        abi: aergoBridgeAbi 
+      },
+      asset: {
+        label: "Native Aergo",
+        type: assetType.native,
+        isPegged: false,
+        id: "",
+        decimals: 18
+      }
+    }
+  },
+  {
+    bridge1: {
+      net: {
+        label: "Aergo Testnet",
+        type: "aergo",
+        chainId: "testnet.aergo.io",
+        endpoint: "https://testnet-api-http.aergo.io",
+        scan: "https://testnet.aergoscan.io/go?q="
+      },
+      contract: {
         id: "Amh76FdT5Q8rmeJxVb31GQubZ4nWQK4HzgbvE1u9jehQTXPg8Ksv",
         abi: aergoBridgeAbi 
       },

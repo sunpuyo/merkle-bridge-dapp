@@ -5,60 +5,35 @@ export const aergoBridgeAbi = {
   functions: [
     {
       name: "freeze",
+      arguments: [{ name: "receiver" }, { name: "amount" }],
+      view: false,
       payable: true,
-      arguments: [{ name: "receiver" }, { name: "amount" }]
+      feeDelegation: false,
     },
     {
       name: "constructor",
-      arguments: [
-        { name: "aergoErc20" },
-        { name: "validators" },
-        { name: "tAnchor" },
-        { name: "tFinal" }
-      ]
+      arguments: [{ name: "tAnchor" }, { name: "tFinal" }],
+      view: false,
+      payable: false,
+      feeDelegation: false,
     },
-    { name: "default", payable: true, arguments: [] },
     {
-      name: "validatorsUpdate",
-      arguments: [
-        { name: "validators" },
-        { name: "signers" },
-        { name: "signatures" }
-      ]
+      name: "default",
+      arguments: [],
+      view: false,
+      payable: true,
+      feeDelegation: false,
     },
     {
       name: "unfreeze",
       arguments: [
         { name: "receiver" },
         { name: "balance" },
-        { name: "merkleProof" }
-      ]
-    },
-    {
-      name: "unlock",
-      arguments: [
-        { name: "receiver" },
-        { name: "balance" },
-        { name: "tokenAddress" },
-        { name: "merkleProof" }
-      ]
-    },
-    {
-      name: "burn",
-      arguments: [
-        { name: "receiver" },
-        { name: "amount" },
-        { name: "mintAddress" }
-      ]
-    },
-    {
-      name: "tokensReceived",
-      arguments: [
-        { name: "operator" },
-        { name: "from" },
-        { name: "value" },
-        { name: "receiver" }
-      ]
+        { name: "merkleProof" },
+      ],
+      view: false,
+      payable: false,
+      feeDelegation: false,
     },
     {
       name: "mint",
@@ -66,57 +41,122 @@ export const aergoBridgeAbi = {
         { name: "receiver" },
         { name: "balance" },
         { name: "tokenOrigin" },
-        { name: "merkleProof" }
-      ]
+        { name: "merkleProof" },
+      ],
+      view: false,
+      payable: false,
+      feeDelegation: false,
     },
     {
-      name: "unfreezeFeeUpdate",
-      arguments: [{ name: "fee" }, { name: "signers" }, { name: "signatures" }]
+      name: "verifyProof",
+      arguments: [
+        { name: "key" },
+        { name: "leafHash" },
+        { name: "ap" },
+        { name: "keyIndex" },
+      ],
+      view: false,
+      payable: false,
+      feeDelegation: false,
+    },
+    {
+      name: "burn",
+      arguments: [
+        { name: "receiver" },
+        { name: "amount" },
+        { name: "mintAddress" },
+      ],
+      view: false,
+      payable: false,
+      feeDelegation: false,
+    },
+    {
+      name: "unlock",
+      arguments: [
+        { name: "receiver" },
+        { name: "balance" },
+        { name: "tokenAddress" },
+        { name: "merkleProof" },
+      ],
+      view: false,
+      payable: false,
+      feeDelegation: false,
+    },
+    {
+      name: "bitIsSet",
+      arguments: [{ name: "bits" }, { name: "i" }],
+      view: false,
+      payable: false,
+      feeDelegation: false,
+    },
+    {
+      name: "tokensReceived",
+      arguments: [
+        { name: "operator" },
+        { name: "from" },
+        { name: "value" },
+        { name: "receiver" },
+      ],
+      view: false,
+      payable: false,
+      feeDelegation: false,
+    },
+    {
+      name: "verifyDepositProof",
+      arguments: [
+        { name: "mapName" },
+        { name: "key" },
+        { name: "value" },
+        { name: "root" },
+        { name: "ap" },
+      ],
+      view: false,
+      payable: false,
+      feeDelegation: false,
     },
     {
       name: "newAnchor",
-      arguments: [
-        { name: "root" },
-        { name: "height" },
-        { name: "signers" },
-        { name: "signatures" }
-      ]
+      arguments: [{ name: "root" }, { name: "height" }],
+      view: false,
+      payable: false,
+      feeDelegation: false,
+    },
+    {
+      name: "oracleUpdate",
+      arguments: [{ name: "newOracle" }],
+      view: false,
+      payable: false,
+      feeDelegation: false,
     },
     {
       name: "tAnchorUpdate",
-      arguments: [
-        { name: "tAnchor" },
-        { name: "signers" },
-        { name: "signatures" }
-      ]
+      arguments: [{ name: "tAnchor" }],
+      view: false,
+      payable: false,
+      feeDelegation: false,
     },
     {
       name: "tFinalUpdate",
-      arguments: [
-        { name: "tFinal" },
-        { name: "signers" },
-        { name: "signatures" }
-      ]
-    }
+      arguments: [{ name: "tFinal" }],
+      view: false,
+      payable: false,
+      feeDelegation: false,
+    },
   ],
   state_variables: [
-    { name: "_unfreezes", type: "map" },
-    { name: "_mintedTokens", type: "map" },
-    { name: "_validators", type: "map" },
-    { name: "_locks", type: "map" },
-    { name: "_mints", type: "map" },
-    { name: "_bridgeTokens", type: "map" },
-    { name: "_aergoErc20Bytes", type: "value" },
-    { name: "_tAnchor", type: "value" },
-    { name: "_unfreezeFee", type: "value" },
-    { name: "_burns", type: "map" },
-    { name: "_validatorsCount", type: "value" },
-    { name: "_contractId", type: "value" },
-    { name: "_anchorRoot", type: "value" },
-    { name: "_anchorHeight", type: "value" },
-    { name: "_tFinal", type: "value" },
-    { name: "_nonce", type: "value" },
-    { name: "_unlocks", type: "map" }
+    { name: "_unfreezes", type: "map", len: 0 },
+    { name: "_mintedTokens", type: "map", len: 0 },
+    { name: "_tFinal", type: "value", len: 0 },
+    { name: "_locks", type: "map", len: 0 },
+    { name: "_anchorRoot", type: "value", len: 0 },
+    { name: "_bridgeTokens", type: "map", len: 0 },
+    { name: "_anchorHeight", type: "value", len: 0 },
+    { name: "_oracle", type: "value", len: 0 },
+    { name: "_tAnchor", type: "value", len: 0 },
+    { name: "_freezes", type: "map", len: 0 },
+    { name: "_mints", type: "map", len: 0 },
+    { name: "_burns", type: "map", len: 0 },
+    { name: "_unlocks", type: "map", len: 0 },
   ]
 };
 
